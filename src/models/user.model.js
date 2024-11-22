@@ -26,6 +26,13 @@ const userSchema = new Schema(
       required: [true, "Fullname is required"],
       trim: true,
     },
+    avatar: {
+      type: String,
+      required: true,
+    },
+    coverImage: {
+      type: String,
+    },
     resources: [
       {
         type: Schema.Types.ObjectId,
