@@ -1,40 +1,70 @@
-import asyncHandler from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import bcrypt from "bcrypt";
-import { ApiResponse } from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js"; // Utility to handle async functions with error handling
+import { ApiError } from "../utils/ApiError.js"; // Custom error handler
+import { User } from "../models/user.model.js"; // User model for interacting with the database
+import { uploadOnCloudinary } from "../utils/cloudinary.js"; // Utility to upload images to Cloudinary
+import bcrypt from "bcrypt"; // Library for hashing passwords
+import { ApiResponse } from "../utils/ApiResponse.js"; // Standardized API response structure
+import jwt from "jsonwebtoken";
+
+// Function to generate access and refresh tokens for the user
+const generateAccessAndRefreshTokens = async (userId) => {
+  try {
+    console.log("Generating tokens for user ID:", userId); // Debugging line
+    const user = await User.findById(userId); // Find user by ID
+    if (!user) {
+      console.log("Error: User not found while generating tokens");
+      throw new ApiError(404, "User not found");
+    }
+
+    const accessToken = user.generateAccessToken(); // Generate access token
+    const refreshToken = user.generateRefreshToken(); // Generate refresh token
+
+    console.log("Generated access token and refresh token"); // Debugging line
+
+    // Store the refresh token in the user's record for future use
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken }; // Return both tokens
+  } catch (error) {
+    console.log("Error while generating tokens:", error.message);
+    throw new ApiError(
+      500,
+      "Something went wrong while generating refresh and access tokens"
+    );
+  }
+};
 
 // The registerUser function is used to handle the user registration process
 const registerUser = asyncHandler(async (req, res) => {
-  // Step 1: Extract the user details from the request body
+  // Step 1: Extract user details from the request body
   const { fullName, email, username, password } = req.body;
-  console.log("User Details: ", fullName, email, username, password);
+  console.log(
+    "User Registration Details: ",
+    fullName,
+    email,
+    username,
+    password
+  );
 
-  // Step 2: Validate the user details to ensure all fields are filled
+  // Step 2: Validate user details to ensure no empty fields
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
   ) {
+    console.log("Error: Missing required fields"); // Debugging line
     throw new ApiError(400, "All fields are required");
   }
 
-  // Step 3: Check if the user already exists by checking for duplicates in username or email
-  const existedUser = await User.findOne({
-    $or: [{ username }, { email }],
-  });
+  // Step 3: Check if user already exists by username or email
+  const existedUser = await User.findOne({ $or: [{ username }, { email }] });
 
-  // If the user exists, throw a conflict error (409)
   if (existedUser) {
+    console.log("Error: User with this username or email already exists"); // Debugging line
     throw new ApiError(409, "User with username or email already exists");
   }
 
   // Step 4: Handle file uploads (avatar and cover image)
-  // Check if files are present in the request
   const avatarLocalPath = req.files?.avatar ? req.files.avatar[0]?.path : null;
-  // const coverImageLocalPath = req.files?.coverImage
-  //   ? req.files.coverImage[0]?.path
-  //   : null;
-
   let coverImageLocalPath;
   if (
     req.files &&
@@ -44,59 +74,206 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImageLocalPath = req.files.coverImage[0];
   }
 
+  // If avatar is missing, throw an error
   if (!avatarLocalPath) {
-    // If avatar is missing, throw a bad request error (400)
+    console.log("Error: Avatar is required but not provided"); // Debugging line
     throw new ApiError(400, "Avatar is required");
   }
 
   let avatar, coverImage;
   try {
-    // Step 5: Upload the avatar to Cloudinary
-    avatar = await uploadOnCloudinary(avatarLocalPath); // Upload avatar to Cloudinary
+    // Step 5: Upload avatar to Cloudinary
+    console.log("Uploading avatar to Cloudinary...");
+    avatar = await uploadOnCloudinary(avatarLocalPath);
     if (!avatar || !avatar.url) {
       throw new ApiError(400, "Avatar file upload failed");
     }
 
     // Step 6: If cover image is provided, upload it to Cloudinary
     if (coverImageLocalPath) {
-      coverImage = await uploadOnCloudinary(coverImageLocalPath); // Optional cover image upload
+      console.log("Uploading cover image to Cloudinary...");
+      coverImage = await uploadOnCloudinary(coverImageLocalPath);
       if (!coverImage || !coverImage.url) {
-        coverImage = null; // Set cover image to null if upload failed
+        coverImage = null; // Set cover image to null if upload fails
+        console.log("Cover image upload failed, setting to null");
       }
     }
   } catch (error) {
-    // If any error occurs during file upload, handle it here
+    console.log("Error during file upload:", error.message);
     throw new ApiError(500, `File upload error: ${error.message}`);
   }
 
-  // Step 7: Hash the user's password before saving it to the database
-  const salt = await bcrypt.genSalt(10); // Generate a salt for password hashing
+  // Step 7: Hash the user's password before saving
+  console.log("Hashing password..."); // Debugging line
+  const salt = await bcrypt.genSalt(10); // Generate a salt for hashing
   const hashedPassword = await bcrypt.hash(password, salt); // Hash the password
 
-  // Step 8: Create the user record in the database
+  // Step 8: Create user record in the database
+  console.log("Creating new user record in the database...");
   const user = await User.create({
     fullName,
-    avatar: avatar.url, // Save the avatar URL from Cloudinary
+    avatar: avatar.url, // Store avatar URL from Cloudinary
     coverImage: coverImage?.url || "", // Optional cover image URL
     email,
-    password: hashedPassword, // Save the hashed password
-    username: username.toLowerCase(), // Save the username in lowercase
+    password: hashedPassword, // Store hashed password
+    username: username.toLowerCase(), // Store username in lowercase for consistency
   });
 
-  // Step 9: Check if the user was successfully created
+  // Step 9: Retrieve the newly created user without sensitive data (password, refreshToken)
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 
-  // If user creation failed, throw an internal server error (500)
   if (!createdUser) {
+    console.log("Error: Failed to create user"); // Debugging line
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
-  // Step 10: Respond with the created user details, excluding sensitive information like password and refreshToken
+  // Step 10: Respond with success message and created user details
+  console.log("User created successfully:", createdUser); // Debugging line
   return res
     .status(201)
     .json(new ApiResponse(200, createdUser, "User Created Successfully"));
 });
 
-export { registerUser };
+// The loginUser function handles the user login process
+const loginUser = asyncHandler(async (req, res) => {
+  // Step 1: Extract login credentials (email/username and password)
+  const { email, username, password } = req.body;
+
+  console.log("Login attempt with:", email, username, password); // Debugging line to check if password is being sent
+
+  // Validate that either email or username is provided, and password is required
+  if (!email || !password) {
+    console.log("Error: Missing email or password"); // Debugging line
+    throw new ApiError(400, "Email and password are required");
+  }
+
+  // Step 2: Check if the user exists by email or username (ensure case-insensitive username handling)
+  let user;
+  if (email) {
+    // Search for the user by email
+    user = await User.findOne({ email });
+  }
+
+  if (!user) {
+    console.log("Error: User not found:", email || username); // Debugging line
+    throw new ApiError(404, "User does not exist");
+  }
+
+  // Step 3: Check if the password is correct using bcrypt.compare()
+  console.log(
+    "Checking if provided password matches the stored hash for user:",
+    user.username
+  );
+  console.log("Password : ", password, "Password 2 : ", user.password);
+  const isPasswordValid = await bcrypt.compare(password, user.password); // Compare provided password with stored hash
+  console.log("Password validation result:", isPasswordValid);
+
+  if (!isPasswordValid) {
+    console.log("Invalid credentials for user:", email || username); // Debugging line
+    throw new ApiError(401, "Invalid User Credentials");
+  }
+
+  // Step 4: Generate access and refresh tokens
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
+
+  // Step 5: Retrieve user details without password and refreshToken
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  // more about refresh token and access token
+
+  // Step 6: Set cookies with tokens for secure access
+  const options = {
+    httpOnly: true, // Prevent client-side access to cookies
+    secure: true, // Ensure cookies are only sent over HTTPS
+  };
+
+  console.log("User logged in successfully:", loggedInUser); // Debugging line
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options) // Set access token cookie
+    .cookie("refreshToken", refreshToken, options) // Set refresh token cookie
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User Logged In Successfully"
+      )
+    );
+});
+
+// The logoutUser function handles logging out the user
+const logoutUser = asyncHandler(async (req, res) => {
+  // Step 1: Clear the refresh token from the user's record in the database
+  await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { refreshToken: undefined } },
+    { new: true } // Return the updated document
+  );
+
+  // Step 2: Clear the cookies storing the access and refresh tokens
+  const options = {
+    httpOnly: true, // Prevent client-side access to cookies
+    secure: true, // Ensure cookies are only sent over HTTPS
+  };
+
+  console.log("User logged out successfully:", req.user._id); // Debugging line
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options) // Clear access token cookie
+    .clearCookie("refreshToken", options) // Clear refresh token cookie
+    .json(new ApiResponse(200, null, "User Logged Out Successfully"));
+});
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Unauthorized Request");
+  }
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const user = await User.findById(decodedToken?._id);
+
+    if (!user) {
+      throw new ApiError(401, "Invalid Refresh Token");
+    }
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      throw new ApiError(401, "Refresh Token is expired or used");
+    }
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    const { accessToken, newRefreshToken } =
+      await generateAccessAndRefreshTokens(user._id);
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", newRefreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, refreshToken: newRefreshToken },
+          "Access Token refreshed"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(401, error?.message || "Invalid Refresh token ");
+  }
+});
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken };
