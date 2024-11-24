@@ -20,6 +20,13 @@ import {
   removeRating,
   getResourceRating,
 } from "../controllers/rating.controller.js";
+
+import {
+  addComment,
+  editComment,
+  deleteComment,
+  getComments,
+} from "../controllers/comment.controller.js";
 // Create a new Express Router instance
 const router = Router();
 
@@ -59,4 +66,20 @@ router.route("/resource/:resourceId/rating").delete(verifyJWT, removeRating);
 // Get resource rating (average rating)
 router.route("/resource/:resourceId/rating").get(verifyJWT, getResourceRating);
 
+// Comment Routes
+// Add a comment to a resource
+router.route("/resource/:resourceId/comment").post(verifyJWT, addComment);
+
+// Edit a comment
+router
+  .route("/resource/:resourceId/comment/:commentId")
+  .put(verifyJWT, editComment);
+
+// Delete a comment
+router
+  .route("/resource/:resourceId/comment/:commentId")
+  .delete(verifyJWT, deleteComment);
+
+// Get all comments for a resource
+router.route("/resource/:resourceId/comments").get(verifyJWT, getComments);
 export default router;
