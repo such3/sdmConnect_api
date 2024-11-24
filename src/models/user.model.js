@@ -38,6 +38,18 @@ const userSchema = new Schema(
     coverImage: {
       type: String,
     },
+    bio: {
+      type: String,
+      min: [10, "Bio must be at least 10 characters long"],
+      max: [500, "Bio must be at most 500 characters long"],
+      default: "Hello, I'm new here!",
+      trim: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
     resources: [
       {
         type: Schema.Types.ObjectId,

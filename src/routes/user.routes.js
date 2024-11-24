@@ -7,7 +7,7 @@ import {
 import { upload } from "../middlewares/multer.middleware.js"; // Middleware to handle file uploads
 import { verifyJWT } from "../middlewares/auth.middleware.js"; // Middleware to verify JWT
 import { refreshAccessToken } from "../controllers/user.controller.js";
-
+import { verifyAdmin } from "../middlewares/admin.middleware.js";
 // Create a new Express Router instance
 const router = Router();
 
@@ -34,4 +34,9 @@ router.route("/login").post(loginUser);
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 // Export the router to be used in other files (usually app.js or server.js)
+
+//  admin secure routes
+router.route("/delete").delete(verifyJWT, verifyAdmin, (req, res) => {
+  res.status(200).json({ message: "User deleted successfully" });
+});
 export default router;

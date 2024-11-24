@@ -27,6 +27,10 @@ const resourceSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    fileSize: {
+      type: Number,
+      required: [true, "File size is required"],
+    },
     isBlocked: {
       type: Boolean,
       default: false,

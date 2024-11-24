@@ -5,17 +5,16 @@ class ApiError extends Error {
     error = [],
     stack = ""
   ) {
-    super(message);
+    super(message); // This automatically sets the message property
     this.statusCode = statusCode;
-    this.data = null; // assignment
+    this.data = null; // Initialization
     this.success = false;
-    this.message = message;
     this.error = error;
 
     if (stack) {
-      this.stack = stack;
+      this.stack = stack; // Use provided stack trace if available
     } else {
-      Error.captureStackTrace(this, this.constructor);
+      Error.captureStackTrace(this, this.constructor); // Capture the stack trace automatically if no custom stack is passed
     }
   }
 }

@@ -9,17 +9,17 @@ import jwt from "jsonwebtoken";
 // Function to generate access and refresh tokens for the user
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
-    console.log("Generating tokens for user ID:", userId); // Debugging line
+    // console.log("Generating tokens for user ID:", userId); // Debugging line
     const user = await User.findById(userId); // Find user by ID
     if (!user) {
-      console.log("Error: User not found while generating tokens");
+      // console.log("Error: User not found while generating tokens");
       throw new ApiError(404, "User not found");
     }
 
     const accessToken = user.generateAccessToken(); // Generate access token
     const refreshToken = user.generateRefreshToken(); // Generate refresh token
 
-    console.log("Generated access token and refresh token"); // Debugging line
+    // console.log("Generated access token and refresh token"); // Debugging line
 
     // Store the refresh token in the user's record for future use
     user.refreshToken = refreshToken;
@@ -27,7 +27,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
     return { accessToken, refreshToken }; // Return both tokens
   } catch (error) {
-    console.log("Error while generating tokens:", error.message);
+    // console.log("Error while generating tokens:", error.message);
     throw new ApiError(
       500,
       "Something went wrong while generating refresh and access tokens"
@@ -39,19 +39,19 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
   // Step 1: Extract user details from the request body
   const { fullName, email, username, password } = req.body;
-  console.log(
-    "User Registration Details: ",
-    fullName,
-    email,
-    username,
-    password
-  );
+  // console.log(
+  //   "User Registration Details: ",
+  //   fullName,
+  //   email,
+  //   username,
+  //   password
+  // );
 
   // Step 2: Validate user details to ensure no empty fields
   if (
     [fullName, email, username, password].some((field) => field?.trim() === "")
   ) {
-    console.log("Error: Missing required fields"); // Debugging line
+    // console.log("Error: Missing required fields"); // Debugging line
     throw new ApiError(400, "All fields are required");
   }
 
@@ -59,7 +59,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const existedUser = await User.findOne({ $or: [{ username }, { email }] });
 
   if (existedUser) {
-    console.log("Error: User with this username or email already exists"); // Debugging line
+    // console.log("Error: User with this username or email already exists"); // Debugging line
     throw new ApiError(409, "User with username or email already exists");
   }
 
@@ -76,14 +76,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // If avatar is missing, throw an error
   if (!avatarLocalPath) {
-    console.log("Error: Avatar is required but not provided"); // Debugging line
+    // console.log("Error: Avatar is required but not provided"); // Debugging line
     throw new ApiError(400, "Avatar is required");
   }
 
   let avatar, coverImage;
   try {
     // Step 5: Upload avatar to Cloudinary
-    console.log("Uploading avatar to Cloudinary...");
+    // console.log("Uploading avatar to Cloudinary...");
     avatar = await uploadOnCloudinary(avatarLocalPath);
     if (!avatar || !avatar.url) {
       throw new ApiError(400, "Avatar file upload failed");
@@ -91,25 +91,25 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // Step 6: If cover image is provided, upload it to Cloudinary
     if (coverImageLocalPath) {
-      console.log("Uploading cover image to Cloudinary...");
+      // console.log("Uploading cover image to Cloudinary...");
       coverImage = await uploadOnCloudinary(coverImageLocalPath);
       if (!coverImage || !coverImage.url) {
         coverImage = null; // Set cover image to null if upload fails
-        console.log("Cover image upload failed, setting to null");
+        // console.log("Cover image upload failed, setting to null");
       }
     }
   } catch (error) {
-    console.log("Error during file upload:", error.message);
+    // console.log("Error during file upload:", error.message);
     throw new ApiError(500, `File upload error: ${error.message}`);
   }
 
   // Step 7: Hash the user's password before saving
-  console.log("Hashing password..."); // Debugging line
+  // console.log("Hashing password..."); // Debugging line
   const salt = await bcrypt.genSalt(10); // Generate a salt for hashing
   const hashedPassword = await bcrypt.hash(password, salt); // Hash the password
 
   // Step 8: Create user record in the database
-  console.log("Creating new user record in the database...");
+  // console.log("Creating new user record in the database...");
   const user = await User.create({
     fullName,
     avatar: avatar.url, // Store avatar URL from Cloudinary
@@ -125,12 +125,12 @@ const registerUser = asyncHandler(async (req, res) => {
   );
 
   if (!createdUser) {
-    console.log("Error: Failed to create user"); // Debugging line
+    // console.log("Error: Failed to create user"); // Debugging line
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
   // Step 10: Respond with success message and created user details
-  console.log("User created successfully:", createdUser); // Debugging line
+  // console.log("User created successfully:", createdUser); // Debugging line
   return res
     .status(201)
     .json(new ApiResponse(200, createdUser, "User Created Successfully"));
@@ -139,13 +139,13 @@ const registerUser = asyncHandler(async (req, res) => {
 // The loginUser function handles the user login process
 const loginUser = asyncHandler(async (req, res) => {
   // Step 1: Extract login credentials (email/username and password)
-  const { email, username, password } = req.body;
+  const { email, password } = req.body;
 
-  console.log("Login attempt with:", email, username, password); // Debugging line to check if password is being sent
+  // console.log("Login attempt with:", email, username, password); // Debugging line to check if password is being sent
 
   // Validate that either email or username is provided, and password is required
   if (!email || !password) {
-    console.log("Error: Missing email or password"); // Debugging line
+    // console.log("Error: Missing email or password"); // Debugging line
     throw new ApiError(400, "Email and password are required");
   }
 
@@ -157,21 +157,21 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   if (!user) {
-    console.log("Error: User not found:", email || username); // Debugging line
+    // console.log("Error: User not found:", email || username); // Debugging line
     throw new ApiError(404, "User does not exist");
   }
 
   // Step 3: Check if the password is correct using bcrypt.compare()
-  console.log(
-    "Checking if provided password matches the stored hash for user:",
-    user.username
-  );
-  console.log("Password : ", password, "Password 2 : ", user.password);
+  // console.log(
+  //   "Checking if provided password matches the stored hash for user:",
+  //   user.username
+  // );
+  // console.log("Password : ", password, "Password 2 : ", user.password);
   const isPasswordValid = await bcrypt.compare(password, user.password); // Compare provided password with stored hash
-  console.log("Password validation result:", isPasswordValid);
+  // console.log("Password validation result:", isPasswordValid);
 
   if (!isPasswordValid) {
-    console.log("Invalid credentials for user:", email || username); // Debugging line
+    // console.log("Invalid credentials for user:", email || username); // Debugging line
     throw new ApiError(401, "Invalid User Credentials");
   }
 
@@ -193,7 +193,7 @@ const loginUser = asyncHandler(async (req, res) => {
     secure: true, // Ensure cookies are only sent over HTTPS
   };
 
-  console.log("User logged in successfully:", loggedInUser); // Debugging line
+  // console.log("User logged in successfully:", loggedInUser); // Debugging line
 
   return res
     .status(200)
@@ -223,7 +223,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     secure: true, // Ensure cookies are only sent over HTTPS
   };
 
-  console.log("User logged out successfully:", req.user._id); // Debugging line
+  // console.log("User logged out successfully:", req.user._id); // Debugging line
 
   return res
     .status(200)
@@ -300,9 +300,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
-  if (!fullName || !email) {
-    throw new ApiError(400, "Full Name and Email are required");
+  const { fullName, email, bio } = req.body;
+  if (!fullName || !email || !bio) {
+    throw new ApiError(400, "Full Name and Email and Bio are required");
   }
 
   const user = User.findByIdAndUpdate(
@@ -311,6 +311,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
       $set: {
         fullName,
         email: email,
+        bio: bio,
       },
     },
     { new: true }

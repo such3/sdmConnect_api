@@ -36,6 +36,18 @@ import userRouter from "./routes/user.routes.js";
 // Routes declaration
 app.use("/api/v1/users", userRouter);
 
+app.use((err, req, res, next) => {
+  // Log the error for debugging (in development)
+  if (process.env.NODE_ENV === "development") {
+    console.error(err);
+  }
+
+  // Respond with an appropriate status code and message
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Something went wrong";
+  return res.status(statusCode).json({ message });
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack); // Log the error
