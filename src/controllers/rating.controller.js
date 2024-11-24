@@ -6,7 +6,9 @@ import asyncHandler from "../utils/asyncHandler.js";
 // Add rating for a resource
 const rateResource = asyncHandler(async (req, res) => {
   const { resourceId } = req.params;
+  console.log(req.params);
   const { rating } = req.body;
+  console.log(req.body);
 
   // Validate rating value (1-5)
   if (rating < 1 || rating > 5) {
