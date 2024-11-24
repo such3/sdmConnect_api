@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { Resource } from "../models/resource.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
+import path from "path";
 
 // Function to create a resource and update the user's resources list
 const createResource = asyncHandler(async (req, res) => {
@@ -272,10 +273,35 @@ const deleteResource = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Resource deleted successfully"));
 });
 
+// Controller for downloading a resource file
+const downloadResource = asyncHandler(async (req, res) => {
+  try {
+    const { filename } = req.params; // Extract filename from URL parameters
+    const resourcePath = path.join(process.cwd(), "uploads", filename); // Build the file path
+
+    // Check if the file exists in the specified directory
+    if (!path.extname(filename) || !filename.match(/\.(pdf)$/)) {
+      throw new ApiError(
+        400,
+        "Invalid file format. Only PDF files are allowed."
+      );
+    }
+
+    // Check if file exists
+    res.sendFile(resourcePath, (err) => {
+      if (err) {
+        return next(new ApiError(404, "File not found"));
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 export {
   createResource,
   getAllResources,
   updateResource,
   deleteResource,
   getSingleResource,
+  downloadResource,
 };

@@ -3,8 +3,20 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import path from "path";
+import dotenv from "dotenv";
+
+// Initialize environment variables from .env file
+dotenv.config();
 
 const app = express();
+
+// Serve static files from the 'uploads' directory
+app.use(
+  "/uploads",
+  verifyJWT,
+  express.static(path.join(process.cwd(), "uploads"))
+);
 
 // CORS configuration
 app.use(
@@ -18,9 +30,12 @@ app.use(
 
 // Security enhancements
 app.use(helmet()); // Adds HTTP headers to protect the app
+
+// Rate limiting setup to avoid too many requests
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
 });
 app.use(limiter); // Apply rate limiting
 
@@ -33,6 +48,7 @@ app.use(cookieParser()); // Parse cookies in requests
 // Routes import
 import userRouter from "./routes/user.routes.js";
 import adminRouter from "./routes/admin.routes.js";
+import { verifyJWT } from "./middlewares/auth.middleware.js";
 
 // Route declaration
 app.use("/api/v1/users", userRouter); // User-related routes
@@ -53,12 +69,17 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ message: "Invalid ID format" });
   }
 
+  // Handle Multer-specific errors (e.g., file size limit, file type)
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ message: `Multer Error: ${err.message}` });
+  }
+
   // Handle custom API errors (e.g., ApiError from your custom error handler)
   if (err.statusCode) {
     return res.status(err.statusCode).json({ message: err.message });
   }
 
-  // Fallback to a generic error message
+  // Fallback to a generic error message for unexpected errors
   return res.status(500).json({ message: "Internal Server Error" });
 });
 
