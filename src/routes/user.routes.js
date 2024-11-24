@@ -1,42 +1,47 @@
+// user.routes.js
 import { Router } from "express";
 import {
   registerUser,
   loginUser,
   logoutUser,
+  refreshAccessToken,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js"; // Middleware to handle file uploads
 import { verifyJWT } from "../middlewares/auth.middleware.js"; // Middleware to verify JWT
-import { refreshAccessToken } from "../controllers/user.controller.js";
-import { verifyAdmin } from "../middlewares/admin.middleware.js";
+import {
+  createResource,
+  getAllResources,
+  getSingleResource,
+  updateResource,
+  deleteResource,
+} from "../controllers/resource.controller.js";
+
 // Create a new Express Router instance
 const router = Router();
 
 // Register Route
-// Handle POST requests to /register
-// Uses the upload middleware to handle file uploads (avatar and coverImage)
 router.route("/register").post(
-  // File upload handling
   upload.fields([
-    { name: "avatar", maxCount: 1 }, // Handle avatar image upload
-    { name: "coverImage", maxCount: 1 }, // Handle cover image upload (optional)
+    { name: "avatar", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
   ]),
-  // Controller function for handling user registration
   registerUser
 );
 
 // Login Route
-// Handle POST requests to /login
 router.route("/login").post(loginUser);
 
-// Logout Route (secured)
-// Handle POST requests to /logout
-// The verifyJWT middleware ensures the user is authenticated before logging out
+// Logout Route
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route("/refresh-token").post(refreshAccessToken);
-// Export the router to be used in other files (usually app.js or server.js)
 
-//  admin secure routes
-router.route("/delete").delete(verifyJWT, verifyAdmin, (req, res) => {
-  res.status(200).json({ message: "User deleted successfully" });
-});
+// Refresh Token Route
+router.route("/refresh-token").post(refreshAccessToken);
+
+// Resource Routes (Secured for users)
+router.route("/resource").post(verifyJWT, createResource);
+router.route("/resources").get(verifyJWT, getAllResources);
+router.route("/resource/:resourceId").get(verifyJWT, getSingleResource);
+router.route("/resource/:resourceId").put(verifyJWT, updateResource);
+router.route("/resource/:resourceId").delete(verifyJWT, deleteResource);
+
 export default router;

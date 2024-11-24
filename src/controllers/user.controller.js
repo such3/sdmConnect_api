@@ -161,6 +161,12 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User does not exist");
   }
 
+  // if (user.isBlocked) {
+  //   throw new ApiError(
+  //     403,
+  //     "User is Blocked By Admin . Contact Admin for additional query"
+  //   );
+  // }
   // Step 3: Check if the password is correct using bcrypt.compare()
   // console.log(
   //   "Checking if provided password matches the stored hash for user:",
@@ -372,6 +378,46 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "Cover Image Updated Successfully"));
 });
+
+// Function to fetch user profile along with resources uploaded by the user
+const getUserProfile = asyncHandler(async (req, res, next) => {
+  // Get user ID from the request (assumed to be attached via JWT middleware)
+  const userId = req.user._id;
+
+  // Fetch the user from the database by their ID
+  const user = await User.findById(userId).select(
+    "-password -refreshToken -updatedAt -__v"
+  );
+
+  // If user is not found, throw an error
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Fetch resources uploaded by the user (populate only necessary fields)
+  const resources = await Resource.find({ owner: userId })
+    .select("title description semester branch url fileSize createdAt ")
+    .sort({ createdAt: -1 }); // Sort by latest resources first
+
+  // Prepare user profile response
+  const userProfile = {
+    fullName: user.fullName,
+    username: user.username,
+    email: user.email,
+    avatar: user.avatar,
+    bio: user.bio,
+    resourcesUploaded: resources, // List of resources uploaded by the user
+    createdAt: user.createdAt,
+  };
+
+  // Send response with user profile and uploaded resources
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, userProfile, "User profile fetched successfully")
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -382,4 +428,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
+  getUserProfile,
 };

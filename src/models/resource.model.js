@@ -18,14 +18,21 @@ const resourceSchema = new mongoose.Schema(
       required: [true, "Description is required"],
       trim: true,
     },
+    semester: {
+      type: Number,
+      required: [true, "Semester is required"],
+      max: [8, "Semster can be Maximum 8"],
+      min: [1, "Semster can be Minimum 1"],
+    },
+    branch: {
+      type: String,
+      required: [true, "Branch is required"],
+      enum: ["ISE", "CSE", "ECE", "MECH", "CIVIL", "EEE", "AIML", "CHEMICAL"],
+    },
     url: {
       type: String,
       required: [true, "File URL is required"],
       trim: true,
-    },
-    views: {
-      type: Number,
-      default: 0,
     },
     fileSize: {
       type: Number,

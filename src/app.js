@@ -27,33 +27,44 @@ app.use(limiter); // Apply rate limiting
 // Body parsing and limits
 app.use(express.json({ limit: "16kb" })); // Set limit for JSON requests
 app.use(express.urlencoded({ extended: true, limit: "16kb" })); // Set limit for URL-encoded requests
-app.use(express.static("public")); // Serve static files
+app.use(express.static("public")); // Serve static files (e.g., for file uploads)
 app.use(cookieParser()); // Parse cookies in requests
 
 // Routes import
 import userRouter from "./routes/user.routes.js";
+import adminRouter from "./routes/admin.routes.js";
 
-// Routes declaration
-app.use("/api/v1/users", userRouter);
+// Route declaration
+app.use("/api/v1/users", userRouter); // User-related routes
+app.use("/api/v1/admin", adminRouter); // Admin-related routes
 
+// Global error handler for uncaught exceptions and rejections
 app.use((err, req, res, next) => {
-  // Log the error for debugging (in development)
   if (process.env.NODE_ENV === "development") {
-    console.error(err);
+    console.error(err); // Log error stack trace in development
   }
 
-  // Respond with an appropriate status code and message
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Something went wrong";
-  return res.status(statusCode).json({ message });
+  // Check for known error type (e.g., ValidationError, CastError) and send appropriate response
+  if (err.name === "ValidationError") {
+    return res.status(400).json({ message: err.message });
+  }
+
+  if (err.name === "CastError") {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
+  // Handle custom API errors (e.g., ApiError from your custom error handler)
+  if (err.statusCode) {
+    return res.status(err.statusCode).json({ message: err.message });
+  }
+
+  // Fallback to a generic error message
+  return res.status(500).json({ message: "Internal Server Error" });
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack); // Log the error
-  res.status(500).json({
-    message: "Internal Server Error", // Return a generic error message
-  });
+// Catch-all route for undefined endpoints (404 handler)
+app.all("*", (req, res) => {
+  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
 });
 
 export default app;
