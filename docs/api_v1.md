@@ -8,7 +8,7 @@ This document describes the available endpoints for interacting with the **sdmCo
 
 - **Description**: Registers a new user. Users can upload an avatar and cover image as part of the registration.
 - **Body**:
-  - `avatar`: Image file for avatar (optional).
+  - `avatar`: Image file for avatar,required.
   - `coverImage`: Image file for cover (optional).
   - `username`: String, required.
   - `email`: String, required.
