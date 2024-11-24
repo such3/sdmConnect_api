@@ -22,16 +22,14 @@ const router = Router();
 //   .route("/admin/unblock-user/:userId")
 //   .patch(verifyJWT, verifyAdmin, unblockUser);
 
-router
-  .route("/admin/delete-user/:userId")
-  .delete(verifyJWT, verifyAdmin, deleteUser);
+router.route("/delete-user/:userId").delete(verifyJWT, verifyAdmin, deleteUser);
 
 router
-  .route("/admin/block-resource/:resourceId")
+  .route("/block-resource/:resourceId")
   .patch(verifyJWT, verifyAdmin, blockResource);
 
 router
-  .route("/admin/unblock-resource/:resourceId")
+  .route("/unblock-resource/:resourceId")
   .patch(verifyJWT, verifyAdmin, unblockResource);
 
 // Admin dashboard route to fetch analytics and statistics

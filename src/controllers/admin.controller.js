@@ -60,6 +60,7 @@ const adminDashboard = asyncHandler(async (req, res) => {
           _id: 1,
           totalResources: 1,
           fullName: "$userDetails.fullName", // Select full name of the user
+          username: "$userDetails.username", // Select username of the user
           avatar: "$userDetails.avatar", // Select avatar of the user
         },
       },

@@ -12,7 +12,7 @@ const createResource = asyncHandler(async (req, res) => {
   // Validate the required fields
   if (
     [title, description, branch, semester, url, fileSize].some(
-      (field) => field?.trim() === ""
+      (field) => field.trim === ""
     )
   ) {
     throw new ApiError(400, "All fields are required");

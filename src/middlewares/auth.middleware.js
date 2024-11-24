@@ -15,7 +15,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
     // If no token is found, return an error (Unauthorized)
     if (!token) {
-      throw new ApiError(401, "Access token is required for authentication");
+      throw new ApiError(401, "You need to login to access this route");
     }
 
     // Step 2: Verify the token using the secret key
