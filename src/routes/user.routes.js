@@ -15,7 +15,11 @@ import {
   updateResource,
   deleteResource,
 } from "../controllers/resource.controller.js";
-
+import {
+  rateResource,
+  removeRating,
+  getResourceRating,
+} from "../controllers/rating.controller.js";
 // Create a new Express Router instance
 const router = Router();
 
@@ -43,5 +47,16 @@ router.route("/resources").get(verifyJWT, getAllResources);
 router.route("/resource/:resourceId").get(verifyJWT, getSingleResource);
 router.route("/resource/:resourceId").put(verifyJWT, updateResource);
 router.route("/resource/:resourceId").delete(verifyJWT, deleteResource);
+
+// Rating Routes (Secured for users)
+
+// Rate a resource
+router.route("/resource/:resourceId/rate").post(verifyJWT, rateResource);
+
+// Remove a rating
+router.route("/resource/:resourceId/rating").delete(verifyJWT, removeRating);
+
+// Get resource rating (average rating)
+router.route("/resource/:resourceId/rating").get(verifyJWT, getResourceRating);
 
 export default router;

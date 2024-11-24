@@ -52,5 +52,14 @@ const resourceSchema = new mongoose.Schema(
   }
 );
 
+resourceSchema.methods.getAverageRating = async function () {
+  const ratings = await Rating.aggregate([
+    { $match: { resource: this._id } }, // Match ratings for this resource
+    { $group: { _id: null, avgRating: { $avg: "$rating" } } }, // Calculate the average
+  ]);
+
+  return ratings.length > 0 ? ratings[0].avgRating : 0; // Return average or 0 if no ratings
+};
+
 resourceSchema.plugin(mongooseAggregatePaginate);
 export const Resource = mongoose.model("Resource", resourceSchema);
