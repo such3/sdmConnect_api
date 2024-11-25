@@ -29,15 +29,15 @@ const resourceSchema = new mongoose.Schema(
       required: [true, "Branch is required"],
       enum: ["ISE", "CSE", "ECE", "MECH", "CIVIL", "EEE", "AIML", "CHEMICAL"],
     },
-    url: {
+    file: {
       type: String,
       required: [true, "File URL is required"],
       trim: true,
     },
-    fileSize: {
-      type: Number,
-      required: [true, "File size is required"],
-    },
+    // fileSize: {
+    //   type: Number,
+    //   required: [true, "File size is required"],
+    // },
     isBlocked: {
       type: Boolean,
       default: false,

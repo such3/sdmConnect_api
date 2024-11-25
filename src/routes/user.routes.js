@@ -27,8 +27,8 @@ import {
   deleteComment,
   getComments,
 } from "../controllers/comment.controller.js";
-import { uploadSinglePdf } from "../middlewares/multerDoc.middleware.js";
-import { downloadResource } from "../controllers/resource.controller.js"; // Controller to handle file downloads
+// import { uploadSinglePdf } from "../middlewares/multerDoc.middleware.js";
+// import { downloadResource } from "../controllers/resource.controller.js"; // Controller to handle file downloads
 // Create a new Express Router instance
 const router = Router();
 
@@ -51,7 +51,7 @@ router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-token").post(refreshAccessToken);
 
 // Resource Routes (Secured for users)
-router.route("/resource").post(verifyJWT, uploadSinglePdf, createResource);
+router.route("/resource").post(verifyJWT, createResource);
 router.route("/resources").get(verifyJWT, getAllResources);
 router.route("/resource/:resourceId").get(verifyJWT, getSingleResource);
 router.route("/resource/:resourceId").put(verifyJWT, updateResource);
@@ -82,8 +82,8 @@ router
   .route("/resource/:resourceId/comment/:commentId")
   .delete(verifyJWT, deleteComment);
 
-// Download resource route (protected)
-router.get("/resource/download/:filename", verifyJWT, downloadResource);
+// // Download resource route (protected)
+// router.get("/resource/download/:filename", verifyJWT, downloadResource);
 
 // Get all comments for a resource
 router.route("/resource/:resourceId/comments").get(verifyJWT, getComments);

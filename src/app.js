@@ -5,7 +5,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import path from "path";
 import dotenv from "dotenv";
-
+import multer from "multer";
 // Initialize environment variables from .env file
 dotenv.config();
 

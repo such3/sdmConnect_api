@@ -3,64 +3,88 @@ import { ApiError } from "../utils/ApiError.js";
 import { Resource } from "../models/resource.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import path from "path";
-
+import mongoose from "mongoose";
+// import { uploadSinglePdf } from "../middlewares/multerDoc.middleware.js"; // Make sure this is correct
 // Function to create a resource and update the user's resources list
 const createResource = asyncHandler(async (req, res) => {
-  // Extract data from the request body
-  const { title, description, branch, semester, url, fileSize } = req.body;
+  // Start by logging to ensure the controller is hit
+  console.log("Controller hit");
 
-  // Validate the required fields
+  // Extract form fields from the request body
+  const { title, description, branch, semester, file } = req.body;
+
+  // Validate required fields (checking for empty or undefined values)
   if (
-    [title, description, branch, semester, url, fileSize].some(
-      (field) => field.trim === ""
+    [title, description, branch, semester, file].some(
+      (field) => !field || field.trim === ""
     )
   ) {
-    throw new ApiError(400, "All fields are required");
+    console.error("Missing required fields");
+    return res
+      .status(400)
+      .json(new ApiResponse(400, null, "All fields are required"));
   }
 
-  // Create the resource in the database
-  const resource = await Resource.create({
+  // Log the form data for debugging
+  console.log("Form data received:", {
     title,
     description,
-    semester,
     branch,
-    url,
-    fileSize,
-    owner: req.user._id, // Set the owner to the current user's ID
+    semester,
+    file, // the file URL provided by the user
   });
 
-  // Check if resource was created
-  if (!resource) {
-    throw new ApiError(500, "Resource not created");
-  }
+  try {
+    // Create the resource in the database
+    const resource = await Resource.create({
+      title,
+      description,
+      semester,
+      branch,
+      file, // Directly use the file URL provided by the user
+      owner: req.user._id, // Set the owner to the current user's ID
+    });
 
-  // Add the created resource to the user's 'resources' array
-  const user = await User.findById(req.user._id);
+    console.log("Resource created:", resource);
 
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
+    // Handle case where resource was not created
+    if (!resource) {
+      console.error("Failed to create resource");
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, "Resource not created"));
+    }
 
-  // Add the resource ID to the user's resources array
-  user.resources.push(resource._id);
+    // Update the user's resource list
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      console.error("User not found");
+      return res.status(404).json(new ApiResponse(404, null, "User not found"));
+    }
 
-  // Save the updated user document
-  await user.save();
+    // Add the created resource to the user's 'resources' array
+    user.resources.push(resource._id);
+    await user.save();
 
-  // Populate the owner field with specific user data (name, username, avatar)
-  const createdResource = await Resource.findById(resource._id).populate(
-    "owner",
-    "fullName username avatar"
-  ); // Populate the owner with specific fields
-
-  // Return the newly created resource along with the owner data
-  return res
-    .status(201)
-    .json(
-      new ApiResponse(201, createdResource, "Resource created successfully")
+    // Populate the owner field and return the newly created resource
+    const createdResource = await Resource.findById(resource._id).populate(
+      "owner",
+      "fullName username avatar"
     );
+
+    return res
+      .status(201)
+      .json(
+        new ApiResponse(201, createdResource, "Resource created successfully")
+      );
+  } catch (error) {
+    console.error("Error during resource creation:", error); // Log any unhandled errors
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, "Internal Server Error"));
+  }
 });
+
 // Combined function to search and filter resources
 const getAllResources = asyncHandler(async (req, res) => {
   // Step 1: Extract query parameters
@@ -273,35 +297,35 @@ const deleteResource = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Resource deleted successfully"));
 });
 
-// Controller for downloading a resource file
-const downloadResource = asyncHandler(async (req, res) => {
-  try {
-    const { filename } = req.params; // Extract filename from URL parameters
-    const resourcePath = path.join(process.cwd(), "uploads", filename); // Build the file path
+// // Controller for downloading a resource file
+// const downloadResource = asyncHandler(async (req, res) => {
+//   try {
+//     const { filename } = req.params; // Extract filename from URL parameters
+//     const resourcePath = path.join(process.cwd(), "uploads", filename); // Build the file path
 
-    // Check if the file exists in the specified directory
-    if (!path.extname(filename) || !filename.match(/\.(pdf)$/)) {
-      throw new ApiError(
-        400,
-        "Invalid file format. Only PDF files are allowed."
-      );
-    }
+//     // Check if the file exists in the specified directory
+//     if (!path.extname(filename) || !filename.match(/\.(pdf)$/)) {
+//       throw new ApiError(
+//         400,
+//         "Invalid file format. Only PDF files are allowed."
+//       );
+//     }
 
-    // Check if file exists
-    res.sendFile(resourcePath, (err) => {
-      if (err) {
-        return next(new ApiError(404, "File not found"));
-      }
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+//     // Check if file exists
+//     res.sendFile(resourcePath, (err) => {
+//       if (err) {
+//         return next(new ApiError(404, "File not found"));
+//       }
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// });
 export {
   createResource,
   getAllResources,
   updateResource,
   deleteResource,
   getSingleResource,
-  downloadResource,
+  // downloadResource,
 };

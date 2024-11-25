@@ -80,7 +80,7 @@ const deleteComment = asyncHandler(async (req, res, next) => {
   }
 
   // Delete the comment
-  await comment.remove();
+  await comment.deleteOne({ _id: comment._id });
 
   // Return success response
   return res.status(200).json({
@@ -100,7 +100,7 @@ const getComments = asyncHandler(async (req, res, next) => {
 
   // Populate the comments with user details
   const comments = await Comment.find({ resource: resourceId })
-    .populate("user", "name email")
+    .populate("user", "fullName username avatar")
     .sort({ createdAt: -1 });
 
   // Return success response

@@ -1,19 +1,23 @@
-# API Documentation
+---
+# **API Documentation**
 
-## **1. Admin Routes (`admin.routes.js`)**
+This document provides detailed information about the API endpoints for managing users, resources, ratings, comments, and more. All API routes follow REST conventions and require authentication for most operations.
+---
 
-These routes are for the admin to manage users and resources.
+## **1. Admin Routes** (`admin.routes.js`)
+
+These routes are for administrative users to manage system resources, users, and view statistics.
 
 ### **1.1. Delete a User**
 
 - **Endpoint**: `DELETE /api/v1/admin/delete-user/:userId`
 - **Method**: `DELETE`
 - **Description**: Deletes a user from the system.
-- **Permissions**: Admin-only (authenticated and authorized via JWT token)
+- **Permissions**: Admin-only (authenticated and authorized via JWT token).
 - **Parameters**:
   - `userId` (required): The ID of the user to be deleted.
 - **Headers**:
-  - `Authorization: Bearer <token>` (JWT token for authentication)
+  - `Authorization: Bearer <token>` (JWT token for authentication).
 - **Response**:
   - **Success**:
     ```json
@@ -21,23 +25,25 @@ These routes are for the admin to manage users and resources.
       "message": "User deleted successfully"
     }
     ```
-  - **Error (e.g., if user not found)**:
+  - **Error**:
     ```json
     {
       "message": "User not found"
     }
     ```
 
+---
+
 ### **1.2. Block a Resource**
 
 - **Endpoint**: `PATCH /api/v1/admin/block-resource/:resourceId`
 - **Method**: `PATCH`
 - **Description**: Blocks a resource, preventing users from accessing it.
-- **Permissions**: Admin-only (authenticated and authorized via JWT token)
+- **Permissions**: Admin-only (authenticated and authorized via JWT token).
 - **Parameters**:
   - `resourceId` (required): The ID of the resource to be blocked.
 - **Headers**:
-  - `Authorization: Bearer <token>` (JWT token for authentication)
+  - `Authorization: Bearer <token>` (JWT token for authentication).
 - **Response**:
   - **Success**:
     ```json
@@ -45,23 +51,25 @@ These routes are for the admin to manage users and resources.
       "message": "Resource blocked successfully"
     }
     ```
-  - **Error (e.g., resource not found)**:
+  - **Error**:
     ```json
     {
       "message": "Resource not found"
     }
     ```
 
+---
+
 ### **1.3. Unblock a Resource**
 
 - **Endpoint**: `PATCH /api/v1/admin/unblock-resource/:resourceId`
 - **Method**: `PATCH`
-- **Description**: Unblocks a resource, allowing users to access it again.
-- **Permissions**: Admin-only (authenticated and authorized via JWT token)
+- **Description**: Unblocks a previously blocked resource, allowing users to access it again.
+- **Permissions**: Admin-only (authenticated and authorized via JWT token).
 - **Parameters**:
   - `resourceId` (required): The ID of the resource to be unblocked.
 - **Headers**:
-  - `Authorization: Bearer <token>` (JWT token for authentication)
+  - `Authorization: Bearer <token>` (JWT token for authentication).
 - **Response**:
   - **Success**:
     ```json
@@ -69,21 +77,23 @@ These routes are for the admin to manage users and resources.
       "message": "Resource unblocked successfully"
     }
     ```
-  - **Error (e.g., resource not found)**:
+  - **Error**:
     ```json
     {
       "message": "Resource not found"
     }
     ```
 
+---
+
 ### **1.4. Admin Dashboard**
 
 - **Endpoint**: `GET /api/v1/admin/dashboard`
 - **Method**: `GET`
-- **Description**: Fetches the admin dashboard with analytics and statistics.
-- **Permissions**: Admin-only (authenticated and authorized via JWT token)
+- **Description**: Fetches the admin dashboard with system statistics and analytics.
+- **Permissions**: Admin-only (authenticated and authorized via JWT token).
 - **Headers**:
-  - `Authorization: Bearer <token>` (JWT token for authentication)
+  - `Authorization: Bearer <token>` (JWT token for authentication).
 - **Response**:
   - **Success**:
     ```json
@@ -98,16 +108,16 @@ These routes are for the admin to manage users and resources.
 
 ---
 
-## **2. User Routes (`user.routes.js`)**
+## **2. User Routes** (`user.routes.js`)
 
-These routes are for users to manage their resources, ratings, comments, and account settings.
+These routes allow users to manage their account, resources, ratings, and comments.
 
 ### **2.1. Register a User**
 
 - **Endpoint**: `POST /api/v1/users/register`
 - **Method**: `POST`
-- **Description**: Registers a new user with avatar and cover image.
-- **Permissions**: Public (No authentication required)
+- **Description**: Registers a new user with an avatar and cover image.
+- **Permissions**: Public (no authentication required).
 - **Request Body**:
   - `avatar` (file): The user's avatar image.
   - `coverImage` (file): The user's cover image.
@@ -126,12 +136,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **2.2. Login a User**
 
 - **Endpoint**: `POST /api/v1/users/login`
 - **Method**: `POST`
-- **Description**: Logs a user into the system and generates an access token.
-- **Permissions**: Public (No authentication required)
+- **Description**: Logs a user into the system and generates a JWT access token.
+- **Permissions**: Public (no authentication required).
 - **Request Body**:
   - `email` (string, required): The user's email.
   - `password` (string, required): The user's password.
@@ -143,12 +155,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **2.3. Logout a User**
 
 - **Endpoint**: `POST /api/v1/users/logout`
 - **Method**: `POST`
-- **Description**: Logs the user out and invalidates the session (removes JWT token).
-- **Permissions**: Authenticated user only.
+- **Description**: Logs the user out and invalidates the JWT token.
+- **Permissions**: Authenticated users only.
 - **Response**:
   - **Success**:
     ```json
@@ -157,12 +171,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **2.4. Refresh Access Token**
 
 - **Endpoint**: `POST /api/v1/users/refresh-token`
 - **Method**: `POST`
 - **Description**: Refreshes the JWT access token using the refresh token.
-- **Permissions**: Authenticated user only.
+- **Permissions**: Authenticated users only.
 - **Request Body**:
   - `refreshToken` (string, required): The user's refresh token.
 - **Response**:
@@ -177,19 +193,20 @@ These routes are for users to manage their resources, ratings, comments, and acc
 
 ## **3. Resource Routes**
 
+These routes allow users to manage resources they upload, including creating, updating, deleting, and viewing resources.
+
 ### **3.1. Create a Resource**
 
 - **Endpoint**: `POST /api/v1/users/resource`
 - **Method**: `POST`
-- **Description**: Allows a logged-in user to upload a new resource (PDF file).
-- **Permissions**: Authenticated user only.
+- **Description**: Allows authenticated users to upload a new resource.
+- **Permissions**: Authenticated users only.
 - **Request Body**:
   - `title` (string, required): The title of the resource.
   - `description` (string, required): The description of the resource.
-  - `semester` (number, required): The semester of the resource (1-8).
-  - `branch` (string, required): The branch of the resource (e.g., CSE, ECE).
+  - `semester` (number, required): The semester associated with the resource (1-8).
+  - `branch` (string, required): The branch (e.g., CSE, ECE).
   - `url` (string, required): The URL to the uploaded resource.
-  - `fileSize` (number, required): The file size of the uploaded resource.
 - **Response**:
   - **Success**:
     ```json
@@ -203,12 +220,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **3.2. Get All Resources**
 
 - **Endpoint**: `GET /api/v1/users/resources`
 - **Method**: `GET`
-- **Description**: Fetches all resources uploaded by the user.
-- **Permissions**: Authenticated user only.
+- **Description**: Retrieves all resources uploaded by the authenticated user.
+- **Permissions**: Authenticated users only.
 - **Response**:
   - **Success**:
     ```json
@@ -220,18 +239,20 @@ These routes are for users to manage their resources, ratings, comments, and acc
         },
         {
           "title": "AI and Deep Learning",
-          "url": "/uploads/deep-learning.pdf"
+          "url": "/uploads/ai-deep-learning.pdf"
         }
       ]
     }
     ```
 
+---
+
 ### **3.3. Get a Single Resource**
 
 - **Endpoint**: `GET /api/v1/users/resource/:resourceId`
 - **Method**: `GET`
-- **Description**: Fetches a single resource by ID.
-- **Permissions**: Authenticated user only.
+- **Description**: Fetches the details of a specific resource by ID.
+- **Permissions**: Authenticated users only.
 - **Response**:
   - **Success**:
     ```json
@@ -244,12 +265,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **3.4. Update a Resource**
 
 - **Endpoint**: `PUT /api/v1/users/resource/:resourceId`
 - **Method**: `PUT`
-- **Description**: Updates the details of an uploaded resource.
-- **Permissions**: Authenticated user only (owner of the resource).
+- **Description**: Allows users to update their uploaded resource.
+- **Permissions**: Authenticated users only (resource owner).
 - **Request Body**:
   - `title` (string, optional): Updated title of the resource.
   - `description` (string, optional): Updated description of the resource.
@@ -268,15 +291,17 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **3.5. Delete a Resource**
 
 - **Endpoint**: `DELETE /api/v1/users/resource/:resourceId`
-- **Method**
+- **Method**: `DELETE`
+- **Description**
 
-: `DELETE`
+: Deletes an uploaded resource.
 
-- **Description**: Deletes an uploaded resource.
-- **Permissions**: Authenticated user only (owner of the resource).
+- **Permissions**: Authenticated users only (resource owner).
 - **Response**:
   - **Success**:
     ```json
@@ -293,8 +318,8 @@ These routes are for users to manage their resources, ratings, comments, and acc
 
 - **Endpoint**: `POST /api/v1/users/resource/:resourceId/rate`
 - **Method**: `POST`
-- **Description**: Allows a user to rate a resource.
-- **Permissions**: Authenticated user only.
+- **Description**: Allows users to rate a resource between 1 and 5.
+- **Permissions**: Authenticated users only.
 - **Request Body**:
   - `rating` (number, required): Rating between 1 and 5.
 - **Response**:
@@ -305,12 +330,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **4.2. Remove a Rating**
 
 - **Endpoint**: `DELETE /api/v1/users/resource/:resourceId/rating`
 - **Method**: `DELETE`
-- **Description**: Removes a user's rating from a resource.
-- **Permissions**: Authenticated user only.
+- **Description**: Removes a user's rating for a resource.
+- **Permissions**: Authenticated users only.
 - **Response**:
   - **Success**:
     ```json
@@ -319,12 +346,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **4.3. Get Resource Rating**
 
 - **Endpoint**: `GET /api/v1/users/resource/:resourceId/rating`
 - **Method**: `GET`
-- **Description**: Gets the average rating of a resource.
-- **Permissions**: Authenticated user only.
+- **Description**: Fetches the average rating of a resource.
+- **Permissions**: Authenticated users only.
 - **Response**:
   - **Success**:
     ```json
@@ -341,10 +370,10 @@ These routes are for users to manage their resources, ratings, comments, and acc
 
 - **Endpoint**: `POST /api/v1/users/resource/:resourceId/comment`
 - **Method**: `POST`
-- **Description**: Allows a user to add a comment on a resource.
-- **Permissions**: Authenticated user only.
+- **Description**: Allows users to add a comment on a resource.
+- **Permissions**: Authenticated users only.
 - **Request Body**:
-  - `comment` (string, required): The comment text.
+  - `comment` (string, required): The text of the comment.
 - **Response**:
   - **Success**:
     ```json
@@ -353,12 +382,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **5.2. Edit a Comment**
 
 - **Endpoint**: `PUT /api/v1/users/resource/:resourceId/comment/:commentId`
 - **Method**: `PUT`
-- **Description**: Allows a user to edit their comment on a resource.
-- **Permissions**: Authenticated user only (owner of the comment).
+- **Description**: Allows users to edit their own comment on a resource.
+- **Permissions**: Authenticated users only (comment owner).
 - **Request Body**:
   - `comment` (string, required): The updated comment text.
 - **Response**:
@@ -369,12 +400,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **5.3. Delete a Comment**
 
 - **Endpoint**: `DELETE /api/v1/users/resource/:resourceId/comment/:commentId`
 - **Method**: `DELETE`
-- **Description**: Allows a user to delete their comment from a resource.
-- **Permissions**: Authenticated user only (owner of the comment).
+- **Description**: Allows users to delete their own comment on a resource.
+- **Permissions**: Authenticated users only (comment owner).
 - **Response**:
   - **Success**:
     ```json
@@ -383,12 +416,14 @@ These routes are for users to manage their resources, ratings, comments, and acc
     }
     ```
 
+---
+
 ### **5.4. Get All Comments for a Resource**
 
 - **Endpoint**: `GET /api/v1/users/resource/:resourceId/comments`
 - **Method**: `GET`
-- **Description**: Retrieves all comments on a resource.
-- **Permissions**: Authenticated user only.
+- **Description**: Retrieves all comments associated with a specific resource.
+- **Permissions**: Authenticated users only.
 - **Response**:
   - **Success**:
     ```json
@@ -397,12 +432,12 @@ These routes are for users to manage their resources, ratings, comments, and acc
         {
           "user": "john_doe",
           "comment": "This resource is amazing!",
-          "createdAt": "2024-10-01T00:00:00.000Z"
+          "createdAt": "2024-10-01T00:00:00Z"
         },
         {
           "user": "jane_doe",
           "comment": "I found this resource helpful.",
-          "createdAt": "2024-10-02T00:00:00.000Z"
+          "createdAt": "2024-10-02T00:00:00Z"
         }
       ]
     }
@@ -416,15 +451,15 @@ These routes are for users to manage their resources, ratings, comments, and acc
 
 - **Endpoint**: `GET /api/v1/users/resource/download/:filename`
 - **Method**: `GET`
-- **Description**: Allows a user to download a resource (PDF) file.
-- **Permissions**: Authenticated user only.
+- **Description**: Allows users to download a specific resource file (PDF).
+- **Permissions**: Authenticated users only.
 - **Parameters**:
   - `filename` (required): The name of the file to be downloaded.
 - **Headers**:
-  - `Authorization: Bearer <token>` (JWT token for authentication)
+  - `Authorization: Bearer <token>` (JWT token for authentication).
 - **Response**:
-  - **Success**: File will be downloaded (e.g., `machine-learning.pdf`).
-  - **Error (e.g., file not found)**:
+  - **Success**: The file will be downloaded (e.g., `machine-learning.pdf`).
+  - **Error** (e.g., file not found):
     ```json
     {
       "message": "File not found"

@@ -70,7 +70,6 @@ const getResourceRating = asyncHandler(async (req, res) => {
     data: { averageRating: avgRating },
   });
 });
-// Remove a rating for a resource
 const removeRating = asyncHandler(async (req, res) => {
   const { resourceId } = req.params; // Get the resource ID from the request params
 
@@ -90,8 +89,8 @@ const removeRating = asyncHandler(async (req, res) => {
     throw new ApiError(404, "You have not rated this resource yet");
   }
 
-  // Step 3: Remove the user's rating for the resource
-  await rating.remove();
+  // Step 3: Remove the user's rating for the resource using deleteOne
+  await Rating.deleteOne({ _id: rating._id });
 
   // Step 4: Optionally, recalculate the average rating for the resource if needed
   const avgRating = await resource.getAverageRating();
@@ -100,7 +99,7 @@ const removeRating = asyncHandler(async (req, res) => {
   return res.status(200).json({
     status: "success",
     message: "Your rating has been removed successfully",
-    data: { averageRating: avgRating }, // You can include the updated average rating
+    data: { averageRating: avgRating }, // Include the updated average rating
   });
 });
 
