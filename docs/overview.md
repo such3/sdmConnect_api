@@ -182,10 +182,10 @@
 62. **RESTful API Design**:
     - All endpoints follow REST principles for resource management.
 63. **User Routes**:
-    - `POST /register`: Register a new user.
-    - `POST /login`: Login a user and generate JWT.
-    - `GET /logout`: Logout a user and invalidate the JWT.
-    - `GET /refresh-token`: Refresh the access token.
+    -  `POST /register`: `Register a new user`.
+    -  `POST /login`: Login a user and generate JWT.
+    -  `GET /logout`: Logout a user and invalidate the JWT.
+    -  `GET /refresh-token`: Refresh the access token.
 64. **Resource Routes**:
     - `POST /resource`: Upload a new resource.
     - `GET /resources`: Get all resources.
@@ -194,9 +194,7 @@
     - `DELETE /resource/:id`: Delete a resource.
 65. **Rating Routes**:
     - `POST /resource/:id/rate`: Rate a resource.
-    - `
-
-DELETE /resource/:id/rating`: Remove a rating.
+    - `DELETE /resource/:id/rating`: Remove a rating.
     - `GET /resource/:id/rating`: Get the average rating of a resource.
 66. **Comment Routes**:
     - `POST /resource/:id/comment`: Add a comment to a resource.
