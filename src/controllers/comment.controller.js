@@ -30,6 +30,8 @@ const addComment = asyncHandler(async (req, res, next) => {
     comment: newComment,
   });
 });
+
+// 2. Edit a comment
 const editComment = asyncHandler(async (req, res, next) => {
   const { resourceId, commentId } = req.params; // Get resourceId and commentId from request params
   const { comment } = req.body; // Get the updated comment text from the body

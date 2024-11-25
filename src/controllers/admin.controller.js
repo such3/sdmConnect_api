@@ -3,6 +3,8 @@ import { Resource } from "../models/resource.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
+
+// Admin Dashboard
 const adminDashboard = asyncHandler(async (req, res) => {
   try {
     // 1. Total Resources Published
@@ -85,61 +87,6 @@ const adminDashboard = asyncHandler(async (req, res) => {
   }
 });
 
-// // Block a user by Admin
-// const blockUser = asyncHandler(async (req, res) => {
-//   const { userId } = req.params; // Get the userId from the request params
-
-//   // Step 1: Find the user by ID
-//   const user = await User.findById(userId);
-
-//   if (!user) {
-//     throw new ApiError(404, "User not found");
-//   }
-
-//   // Step 2: Block the user (set isBlocked to true)
-//   user.isBlocked = true;
-
-//   // Step 3: Save the user with updated status
-//   await user.save();
-
-//   // Step 4: Invalidate the user's session
-//   // 1. Clear the access token from the cookie
-//   res.clearCookie("accessToken");
-
-//   // 2. Optionally, blacklist or delete the refresh token from the database
-//   // Assuming you store refresh tokens in a "RefreshToken" model
-//   await RefreshToken.deleteMany({ user: userId }); // This deletes all refresh tokens associated with the user
-
-//   // Step 5: Return success response
-//   return res
-//     .status(200)
-//     .json(
-//       new ApiResponse(200, null, "User blocked and logged out successfully")
-//     );
-// });
-// Unblock a user by Admin
-// const unblockUser = asyncHandler(async (req, res) => {
-//   const { userId } = req.params; // Get the userId from the request params
-
-//   // Step 1: Find the user by ID
-//   const user = await User.findById(userId);
-
-//   if (!user) {
-//     throw new ApiError(404, "User not found");
-//   }
-
-//   // Step 2: Unblock the user (set isBlocked to false)
-//   user.isBlocked = false;
-
-//   // Step 3: Save the user with updated status
-//   await user.save();
-
-//   // Step 4: Return success response
-//   return res
-//     .status(200)
-//     .json(new ApiResponse(200, null, "User unblocked successfully"));
-// });
-
 // Delete a user by Admin
 const deleteUser = asyncHandler(async (req, res) => {
   const { userId } = req.params; // Get the userId from the request params
@@ -218,11 +165,4 @@ const unblockResource = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Resource unblocked successfully"));
 });
 
-export {
-  adminDashboard,
-  //   blockUser,
-  //   unblockUser,
-  deleteUser,
-  blockResource,
-  unblockResource,
-};
+export { adminDashboard, deleteUser, blockResource, unblockResource };

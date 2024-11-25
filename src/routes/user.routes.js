@@ -5,86 +5,166 @@ import {
   loginUser,
   logoutUser,
   refreshAccessToken,
-} from "../controllers/user.controller.js";
+} from "../controllers/user.controller.js"; // User authentication controllers
 import { upload } from "../middlewares/multer.middleware.js"; // Middleware to handle file uploads
-import { verifyJWT } from "../middlewares/auth.middleware.js"; // Middleware to verify JWT
+import { verifyJWT } from "../middlewares/auth.middleware.js"; // Middleware to verify JWT token
 import {
   createResource,
   getAllResources,
   getSingleResource,
   updateResource,
   deleteResource,
-} from "../controllers/resource.controller.js";
+} from "../controllers/resource.controller.js"; // Resource management controllers
 import {
   rateResource,
   removeRating,
   getResourceRating,
-} from "../controllers/rating.controller.js";
-
+} from "../controllers/rating.controller.js"; // Rating management controllers
 import {
   addComment,
   editComment,
   deleteComment,
   getComments,
-} from "../controllers/comment.controller.js";
-// import { uploadSinglePdf } from "../middlewares/multerDoc.middleware.js";
-// import { downloadResource } from "../controllers/resource.controller.js"; // Controller to handle file downloads
+} from "../controllers/comment.controller.js"; // Comment management controllers
+
 // Create a new Express Router instance
 const router = Router();
 
-// Register Route
+/**
+ * @route POST /register
+ * @description Register a new user
+ * @access Public
+ */
 router.route("/register").post(
   upload.fields([
-    { name: "avatar", maxCount: 1 },
-    { name: "coverImage", maxCount: 1 },
+    { name: "avatar", maxCount: 1 }, // Avatar image upload
+    { name: "coverImage", maxCount: 1 }, // Cover image upload
   ]),
-  registerUser
+  registerUser // User registration handler
 );
 
-// Login Route
-router.route("/login").post(loginUser);
+/**
+ * @route POST /login
+ * @description Login an existing user
+ * @access Public
+ */
+router.route("/login").post(loginUser); // User login handler
 
-// Logout Route
-router.route("/logout").post(verifyJWT, logoutUser);
+/**
+ * @route POST /logout
+ * @description Logout the authenticated user
+ * @access Private (requires JWT)
+ */
+router.route("/logout").post(verifyJWT, logoutUser); // User logout handler
 
-// Refresh Token Route
-router.route("/refresh-token").post(refreshAccessToken);
+/**
+ * @route POST /refresh-token
+ * @description Refresh the access token using the refresh token
+ * @access Public
+ */
+router.route("/refresh-token").post(refreshAccessToken); // Token refresh handler
 
-// Resource Routes (Secured for users)
-router.route("/resource").post(verifyJWT, createResource);
-router.route("/resources").get(verifyJWT, getAllResources);
-router.route("/resource/:resourceId").get(verifyJWT, getSingleResource);
-router.route("/resource/:resourceId").put(verifyJWT, updateResource);
-router.route("/resource/:resourceId").delete(verifyJWT, deleteResource);
+// Resource Routes (Secured for authenticated users)
 
-// Rating Routes (Secured for users)
+/**
+ * @route POST /resource
+ * @description Create a new resource
+ * @access Private (requires JWT)
+ */
+router.route("/resource").post(verifyJWT, createResource); // Resource creation handler
 
-// Rate a resource
-router.route("/resource/:resourceId/rate").post(verifyJWT, rateResource);
+/**
+ * @route GET /resources
+ * @description Get all resources
+ * @access Private (requires JWT)
+ */
+router.route("/resources").get(verifyJWT, getAllResources); // Fetch all resources
 
-// Remove a rating
-router.route("/resource/:resourceId/rating").delete(verifyJWT, removeRating);
+/**
+ * @route GET /resource/:resourceId
+ * @description Get a single resource by ID
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId").get(verifyJWT, getSingleResource); // Fetch a specific resource
 
-// Get resource rating (average rating)
-router.route("/resource/:resourceId/rating").get(verifyJWT, getResourceRating);
+/**
+ * @route PUT /resource/:resourceId
+ * @description Update an existing resource by ID
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId").put(verifyJWT, updateResource); // Resource update handler
 
-// Comment Routes
-// Add a comment to a resource
-router.route("/resource/:resourceId/comment").post(verifyJWT, addComment);
+/**
+ * @route DELETE /resource/:resourceId
+ * @description Delete a resource by ID
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId").delete(verifyJWT, deleteResource); // Resource deletion handler
 
-// Edit a comment
+// Rating Routes (Secured for authenticated users)
+
+/**
+ * @route POST /resource/:resourceId/rate
+ * @description Rate a resource
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId/rate").post(verifyJWT, rateResource); // Rate a resource
+
+/**
+ * @route DELETE /resource/:resourceId/rating
+ * @description Remove rating from a resource
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId/rating").delete(verifyJWT, removeRating); // Remove rating from resource
+
+/**
+ * @route GET /resource/:resourceId/rating
+ * @description Get the average rating of a resource
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId/rating").get(verifyJWT, getResourceRating); // Get resource's average rating
+
+// Comment Routes (Secured for authenticated users)
+
+/**
+ * @route POST /resource/:resourceId/comment
+ * @description Add a comment to a resource
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId/comment").post(verifyJWT, addComment); // Add comment to resource
+
+/**
+ * @route PUT /resource/:resourceId/comment/:commentId
+ * @description Edit a comment on a resource
+ * @access Private (requires JWT)
+ */
 router
   .route("/resource/:resourceId/comment/:commentId")
-  .put(verifyJWT, editComment);
+  .put(verifyJWT, editComment); // Edit existing comment
 
-// Delete a comment
+/**
+ * @route DELETE /resource/:resourceId/comment/:commentId
+ * @description Delete a comment from a resource
+ * @access Private (requires JWT)
+ */
 router
   .route("/resource/:resourceId/comment/:commentId")
-  .delete(verifyJWT, deleteComment);
+  .delete(verifyJWT, deleteComment); // Delete comment
 
-// // Download resource route (protected)
-// router.get("/resource/download/:filename", verifyJWT, downloadResource);
+/**
+ * @route GET /resource/:resourceId/comments
+ * @description Get all comments for a specific resource
+ * @access Private (requires JWT)
+ */
+router.route("/resource/:resourceId/comments").get(verifyJWT, getComments); // Get all comments for resource
 
-// Get all comments for a resource
-router.route("/resource/:resourceId/comments").get(verifyJWT, getComments);
+// Uncomment below to enable download resource functionality
+// /**
+//  * @route GET /resource/download/:filename
+//  * @description Download a resource (secured)
+//  * @access Private (requires JWT)
+//  */
+// router.get("/resource/download/:filename", verifyJWT, downloadResource); // Resource download handler
+
+// Export the router to be used in the main app
 export default router;

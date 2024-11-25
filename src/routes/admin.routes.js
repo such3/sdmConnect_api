@@ -1,6 +1,6 @@
 import {
-  //   blockUser,
-  //   unblockUser,
+  // blockUser,
+  // unblockUser,
   deleteUser,
   blockResource,
   unblockResource,
@@ -14,6 +14,8 @@ import { verifyAdmin } from "../middlewares/admin.middleware.js"; // Admin check
 const router = Router();
 
 // Admin-only routes
+
+// Uncomment the following routes when needed
 // router
 //   .route("/admin/block-user/:userId")
 //   .patch(verifyJWT, verifyAdmin, blockUser);
