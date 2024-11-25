@@ -158,7 +158,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   await Resource.updateMany({ owner: userId }, { $pull: { owner: userId } });
 
   // Step 4: Delete the user from the database
-  await user.remove();
+  await user.deleteOne({ _id: userId });
 
   // Step 5: Return success response
   return res
