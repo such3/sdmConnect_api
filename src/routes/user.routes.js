@@ -4,10 +4,7 @@ import {
   registerUser,
   loginUser,
   logoutUser,
-  getCurrentUser,
   refreshAccessToken,
-  publicProfile,
-  updateAccountDetails,
 } from "../controllers/user.controller.js"; // User authentication controllers
 import { upload } from "../middlewares/multer.middleware.js"; // Middleware to handle file uploads
 import { verifyJWT } from "../middlewares/auth.middleware.js"; // Middleware to verify JWT token
@@ -31,7 +28,7 @@ import {
 } from "../controllers/comment.controller.js"; // Comment management controllers
 
 // Create a new Express Router instance
-const router = new Router();
+const router = Router();
 
 /**
  * @route POST /register
@@ -104,10 +101,7 @@ router.route("/resource/:resourceId").put(verifyJWT, updateResource); // Resourc
  */
 router.route("/resource/:resourceId").delete(verifyJWT, deleteResource); // Resource deletion handler
 
-router.route("/profile").get(verifyJWT, getCurrentUser); // Fetch a specific user
 // Rating Routes (Secured for authenticated users)
-
-router.route("/profile").patch(verifyJWT, updateAccountDetails);
 
 /**
  * @route POST /resource/:resourceId/rate
@@ -173,7 +167,4 @@ router.route("/resource/:resourceId/comments").get(verifyJWT, getComments); // G
 // router.get("/resource/download/:filename", verifyJWT, downloadResource); // Resource download handler
 
 // Export the router to be used in the main app
-
-router.route("/public-profile/:username", verifyJWT, publicProfile);
-
 export default router;

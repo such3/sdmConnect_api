@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import { Rating } from "./rating.model.js";
-import dbErrorHandler from "../utils/dbErrorHandler.js"; // Import error handler
-
 const resourceSchema = new mongoose.Schema(
   {
     title: {
@@ -36,6 +34,10 @@ const resourceSchema = new mongoose.Schema(
       required: [true, "File URL is required"],
       trim: true,
     },
+    // fileSize: {
+    //   type: Number,
+    //   required: [true, "File size is required"],
+    // },
     isBlocked: {
       type: Boolean,
       default: false,
@@ -52,18 +54,12 @@ const resourceSchema = new mongoose.Schema(
 
 resourceSchema.methods.getAverageRating = async function () {
   const ratings = await Rating.aggregate([
-    { $match: { resource: this._id } },
-    { $group: { _id: null, avgRating: { $avg: "$rating" } } },
+    { $match: { resource: this._id } }, // Match ratings for this resource
+    { $group: { _id: null, avgRating: { $avg: "$rating" } } }, // Calculate the average
   ]);
-  return ratings.length > 0 ? ratings[0].avgRating : 0;
+
+  return ratings.length > 0 ? ratings[0].avgRating : 0; // Return average or 0 if no ratings
 };
 
 resourceSchema.plugin(mongooseAggregatePaginate);
-
-// Error handling middleware for MongoDB errors
-resourceSchema.post("save", function (error, doc, next) {
-  const err = dbErrorHandler(error); // Use the error handler utility
-  next(err);
-});
-
 export const Resource = mongoose.model("Resource", resourceSchema);
