@@ -1,5 +1,6 @@
+Here’s the updated **README** with the requested changes:
 
-
+```markdown
 # sdmConnect: Resource Management API
 
 ## Overview
@@ -44,7 +45,7 @@ The **Resource Management API** is a RESTful web service that allows users to ma
 
 ### 6. **File Uploads**
    - **Current Uploads**: At present, users are only able to upload resources by providing a **URL** link to the file (e.g., PDF, image) hosted elsewhere.
-   - **Future Upgrade**: The ability to upload files directly to the server will be rolled out in a future upgrade. This upgrade is planned to improve user experience by allowing file uploads directly to the server, however, it was postponed for now due to the potential server load that it would impose. 
+   - **Future Upgrade**: The ability to upload files directly to the server will be rolled out in a future upgrade. This upgrade is planned to improve user experience by allowing file uploads directly to the server, however, it was postponed for now due to the potential server load that it would impose.
 
 ---
 
@@ -98,20 +99,15 @@ Authorization: Bearer <token>
 
 ---
 
-## Developer Information
+## Project Background
 
-**Developer**: Sucheendra  
-**Institution**: SDMCET (Department of ISE)  
-**Batch**: 27
+We built **sdmConnect** as part of our **Software Engineering** course. The course required us to create a project to understand and apply the Software Development Life Cycle (SDLC), create Data Flow Diagrams (DFD), Sequence Diagrams, Requirements Gathering, Testing, and other key aspects of software development. 
 
-### Contact Details
-
-- **Email**: [sucheendra.email@example.com](mailto:sucheendrabhat@gmail.com)
-- **Instagram**: [@sucheendra_insta](https://www.instagram.com/sucheendrabhat)
-- **LinkedIn**: [Sucheendra's LinkedIn](https://www.linkedin.com/in/sucheendra)
+This project allowed us to dive deep into backend development, API design, user management, and resource handling, helping us gain hands-on experience in building robust applications for real-world use cases.
 
 ---
 
 ## Conclusion
 
 The **Resource Management API** is designed to help manage educational content, encourage interaction through ratings and comments, and offer administrative tools for maintaining system integrity. This API can be used as a foundation for building robust educational platforms where users can contribute and access valuable resources. While file upload functionality is currently limited to URLs, we plan to support direct file uploads in the next upgrade to enhance the overall experience.
+```
