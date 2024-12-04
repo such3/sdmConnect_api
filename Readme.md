@@ -1,6 +1,3 @@
-Here’s the updated **README** with the requested changes:
-
-```markdown
 # sdmConnect: Resource Management API
 
 ## Overview
