@@ -1,14 +1,19 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
-// Configure Cloudinary
+// Configure Cloudinary with environment variables
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Function to upload a file to Cloudinary
+/**
+ * Function to upload a file to Cloudinary and remove it from the local server.
+ *
+ * @param {string} localFilePath - The local file path of the file to be uploaded.
+ * @returns {Object|null} - The Cloudinary response object if the upload is successful, null otherwise.
+ */
 const uploadOnCloudinary = async (localFilePath) => {
   try {
     // Ensure the localFilePath exists
@@ -22,18 +27,18 @@ const uploadOnCloudinary = async (localFilePath) => {
 
     // Upload the file to Cloudinary
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto", // Automatically detect the resource type
+      resource_type: "auto", // Automatically detect the resource type (image, video, etc.)
     });
 
     // Log the full response for debugging (including the URL)
     console.log("Cloudinary upload response:", response);
 
-    // Remove the file from the local server
-    fs.unlinkSync(localFilePath); // Use unlinkSync for now, but can switch to async for production
+    // Remove the file from the local server after successful upload
+    fs.unlinkSync(localFilePath); // Synchronously delete the file from the local server
 
     console.log(`File uploaded and local file removed: ${localFilePath}`);
 
-    // Return the Cloudinary response
+    // Return the Cloudinary response containing details like URL, public_id, etc.
     return response;
   } catch (error) {
     // Log the error for debugging (including the full error object)

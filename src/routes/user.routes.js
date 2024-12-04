@@ -4,6 +4,7 @@ import {
   registerUser,
   loginUser,
   logoutUser,
+  getCurrentUser,
   refreshAccessToken,
 } from "../controllers/user.controller.js"; // User authentication controllers
 import { upload } from "../middlewares/multer.middleware.js"; // Middleware to handle file uploads
@@ -101,6 +102,7 @@ router.route("/resource/:resourceId").put(verifyJWT, updateResource); // Resourc
  */
 router.route("/resource/:resourceId").delete(verifyJWT, deleteResource); // Resource deletion handler
 
+router.route("/profile").get(verifyJWT, getCurrentUser); // Fetch a specific user
 // Rating Routes (Secured for authenticated users)
 
 /**
